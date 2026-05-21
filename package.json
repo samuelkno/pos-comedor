@@ -1,0 +1,12 @@
+{
+  "name": "pos-comedor",
+  "version": "1.0.0",
+  "description": "Punto de venta para comedor con turnos de desayuno y almuerzo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

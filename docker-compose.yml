@@ -1,0 +1,9 @@
+services:
+  pos-comedor:
+    build: .
+    container_name: pos-comedor
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      - PORT=3000
