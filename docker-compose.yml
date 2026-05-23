@@ -7,3 +7,8 @@ services:
     restart: unless-stopped
     environment:
       - PORT=3000
+    volumes:
+      - pos-data:/app/data
+
+volumes:
+  pos-data:
