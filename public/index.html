@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POS Comedor</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#FFFFFF;
+      --bg2:#F0F6FF;
+      --bg3:#E2EFFD;
+      --text:#0F2744;
+      --text2:#4A6FA5;
+      --text3:#8AABCE;
+      --border:rgba(74,111,165,0.18);
+      --border2:rgba(74,111,165,0.35);
+      --radius-md:10px;
+      --radius-lg:14px;
+      /* Azul primario */
+      --blue-50:#EBF4FF;
+      --blue-100:#BDD9F8;
+      --blue-400:#2E86DE;
+      --blue-600:#1A5FAB;
+      --blue-800:#0F3A6E;
+      /* Acento cielo */
+      --sky-50:#E8F7FF;
+      --sky-400:#38B6FF;
+      --sky-600:#0090D6;
+      /* Verde éxito */
+      --green-50:#E6F9F2;
+      --green-400:#1DB87A;
+      --green-600:#0F8A59;
+      --green-800:#075C3A;
+      /* Rojo error */
+      --red-50:#FEF0F0;
+      --red-400:#E84040;
+      --red-600:#B52020;
+      /* Amarillo advertencia */
+      --yellow-50:#FFFBEA;
+      --yellow-400:#F5A623;
+      --yellow-800:#7A4D00;
+    }
+    body{background:var(--bg3);font-family:system-ui,-apple-system,sans-serif;color:var(--text);min-height:100vh;}
+    .app{max-width:1100px;margin:0 auto;padding:1rem;}
+    @media(min-width:768px){.app{padding:1.5rem 2rem;}}
+
+    /* Header */
+    .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;padding:.75rem 1rem;background:var(--bg);border-radius:var(--radius-lg);border:.5px solid var(--border);box-shadow:0 1px 6px rgba(46,134,222,0.08);}
+    .header h1{font-size:18px;font-weight:700;color:var(--blue-800);display:flex;align-items:center;gap:8px;}
+    .header-right{display:flex;align-items:center;gap:10px;}
+    .date-badge{font-size:12px;color:var(--text2);}
+    .admin-badge{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;cursor:pointer;transition:.15s;}
+    .admin-badge.off{background:var(--bg2);color:var(--text2);border:.5px solid var(--border);}
+    .admin-badge.on{background:var(--blue-50);color:var(--blue-600);border:.5px solid var(--blue-100);}
+
+    /* Tabs */
+    .tabs{display:flex;gap:8px;margin-bottom:1rem;}
+    .tab{flex:1;padding:11px 6px;border:.5px solid var(--border);border-radius:var(--radius-md);background:var(--bg);cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);text-align:center;transition:.12s;}
+    .tab.t-des{background:var(--sky-50);border-color:var(--sky-400);color:var(--blue-800);}
+    .tab.t-alm{background:var(--blue-50);border-color:var(--blue-400);color:var(--blue-800);}
+    .tab.t-his{background:var(--bg2);border-color:var(--border2);color:var(--blue-600);}
+    .tab.t-res{background:var(--green-50);border-color:var(--green-400);color:var(--green-800);}
+
+    /* Secciones */
+    .section{border:.5px solid var(--border);border-radius:var(--radius-lg);background:var(--bg);padding:1rem;margin-bottom:1rem;box-shadow:0 1px 4px rgba(46,134,222,0.06);}
+    .sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}
+    .sec-title{font-size:15px;font-weight:600;color:var(--blue-800);display:flex;align-items:center;gap:8px;}
+
+    /* Badges de estado */
+    .badge-open{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--green-50);color:var(--green-800);font-weight:600;}
+    .badge-closed{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--bg2);color:var(--text2);font-weight:500;}
+
+    /* Botones */
+    .btn{padding:8px 14px;border-radius:var(--radius-md);border:.5px solid var(--border2);background:var(--bg);cursor:pointer;font-size:13px;font-weight:500;color:var(--text);transition:.1s;}
+    .btn:active{transform:scale(0.97);}
+    .btn-open{background:var(--green-50);border-color:var(--green-400);color:var(--green-800);}
+    .btn-close{background:var(--red-50);border-color:var(--red-400);color:var(--red-600);}
+    .btn-primary{background:var(--blue-50);border-color:var(--blue-400);color:var(--blue-600);}
+    .status-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:.25rem;}
+    .status-item{font-size:12px;color:var(--text2);}
+    .status-item span{font-weight:600;color:var(--text);}
+
+    /* Categorías de platillos */
+    .cat-layout{display:flex;flex-direction:column;gap:14px;margin-bottom:1rem;}
+    .cat-block{}
+    .cat-label{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+    .food-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;}
+    @media(min-width:768px){.food-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;}}
+    .food-btn{min-height:76px;border:2px solid var(--border);border-radius:var(--radius-lg);background:var(--bg);cursor:pointer;padding:10px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;user-select:none;transition:.1s;}
+    .food-btn:active{transform:scale(0.93);}
+    .food-btn.has-qty{border-color:var(--blue-400);background:var(--blue-50);}
+    .food-btn .f-name{font-size:13px;font-weight:600;color:var(--text);text-align:center;line-height:1.3;}
+    .food-btn .f-price{font-size:12px;color:var(--text2);}
+    .food-btn.has-qty .f-name{color:var(--blue-800);}
+    .food-btn.has-qty .f-price{color:var(--blue-600);}
+    .qty-badge{position:absolute;top:6px;right:8px;background:var(--blue-400);color:#fff;font-size:12px;font-weight:700;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 5px;}
+
+    /* Barra del carrito */
+    .cart-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .cart-summary{flex:1;min-width:120px;background:var(--blue-50);border-radius:var(--radius-md);padding:8px 12px;font-size:13px;color:var(--blue-800);line-height:1.5;border:.5px solid var(--blue-100);}
+    .cart-total{font-size:16px;font-weight:700;}
+    .btn-sell{height:48px;padding:0 20px;font-size:15px;font-weight:700;background:var(--blue-400);border:none;border-radius:var(--radius-md);color:#fff;cursor:pointer;}
+    .btn-sell:disabled{background:var(--bg2);color:var(--text3);cursor:default;}
+    .btn-sell:active:not(:disabled){transform:scale(0.97);}
+    .btn-clear{height:48px;padding:0 14px;font-size:13px;background:var(--red-50);border:none;border-radius:var(--radius-md);color:var(--red-600);cursor:pointer;}
+    .btn-clear:active{transform:scale(0.97);}
+
+    /* Lista de ventas */
+    .sales-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;}
+    .sale-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg2);border-radius:var(--radius-md);font-size:13px;border:.5px solid var(--border);}
+    .del-btn{background:none;border:none;cursor:pointer;color:var(--text3);font-size:20px;padding:4px 6px;border-radius:var(--radius-md);}
+    .del-btn:active{background:var(--border);}
+    .lock-icon{color:var(--text3);font-size:16px;padding:4px 6px;}
+    .empty-msg{font-size:13px;color:var(--text2);padding:.5rem 0;}
+    .divider{height:.5px;background:var(--border);margin:.75rem 0;}
+
+    /* Manage */
+    .manage-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border:.5px solid var(--border);border-radius:var(--radius-md);font-size:13px;margin-bottom:6px;background:var(--bg2);}
+    .add-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:.5rem;}
+    .add-row input{flex:1;min-width:100px;padding:8px 10px;border:.5px solid var(--border2);border-radius:var(--radius-md);background:var(--bg);color:var(--text);font-size:13px;}
+    .add-row input:focus{outline:none;border-color:var(--blue-400);}
+
+    /* Resumen */
+    .summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+    .metric{background:var(--bg2);border-radius:var(--radius-md);padding:1rem;text-align:center;border:.5px solid var(--border);}
+    .metric-label{font-size:12px;color:var(--text2);margin-bottom:6px;}
+    .metric-val{font-size:22px;font-weight:700;}
+    .metric-val.green{color:var(--green-600);}
+    .metric-val.blue{color:var(--blue-600);}
+
+    /* Historial */
+    .history-day{border:.5px solid var(--border);border-radius:var(--radius-md);margin-bottom:10px;overflow:hidden;}
+    .history-day-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);cursor:pointer;}
+    .history-day-header:hover{background:var(--blue-50);}
+    .history-day-title{font-size:14px;font-weight:600;color:var(--blue-800);}
+    .history-day-total{font-size:14px;font-weight:700;color:var(--green-600);}
+    .history-day-body{padding:10px 14px;display:none;}
+    .history-day-body.open{display:block;}
+    .history-turno-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;margin-top:8px;}
+    .history-sale-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:.5px solid var(--border);}
+
+    /* Toast */
+    .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--blue-800);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none;}
+    .toast.show{opacity:1;}
+
+    /* Modales */
+    .modal-overlay{position:fixed;inset:0;background:rgba(15,39,68,0.45);display:flex;align-items:center;justify-content:center;z-index:100;padding:1rem;}
+    .modal{background:var(--bg);border-radius:var(--radius-lg);border:.5px solid var(--border);padding:1.5rem;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(15,39,68,0.18);}
+    .modal-title{font-size:17px;font-weight:700;color:var(--blue-800);margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;}
+
+    /* Cobro */
+    .cobro-linea{display:flex;justify-content:space-between;font-size:14px;margin-bottom:.5rem;}
+    .cobro-linea .lbl{color:var(--text2);}
+    .cobro-linea .val{font-weight:500;}
+    .cobro-total{display:flex;justify-content:space-between;align-items:center;background:var(--green-50);border-radius:var(--radius-md);padding:10px 14px;margin-bottom:1.25rem;border:.5px solid var(--green-400);}
+    .cobro-total .lbl{font-size:15px;font-weight:600;color:var(--green-800);}
+    .cobro-total .val{font-size:22px;font-weight:700;color:var(--green-600);}
+    .cobro-input-label{font-size:13px;color:var(--text2);margin-bottom:.4rem;}
+    .cobro-input{width:100%;font-size:28px;font-weight:700;text-align:center;padding:12px;border:2px solid var(--border2);border-radius:var(--radius-md);background:var(--bg);color:var(--text);margin-bottom:1rem;}
+    .vuelto-box{border-radius:var(--radius-md);padding:12px 14px;text-align:center;margin-bottom:1.25rem;}
+    .vuelto-box.ok{background:var(--green-50);border:.5px solid var(--green-400);}
+    .vuelto-box.err{background:var(--red-50);border:.5px solid var(--red-400);}
+    .vuelto-lbl{font-size:12px;font-weight:600;margin-bottom:4px;}
+    .vuelto-lbl.ok{color:var(--green-800);}
+    .vuelto-lbl.err{color:var(--red-600);}
+    .vuelto-val{font-size:30px;font-weight:700;}
+    .vuelto-val.ok{color:var(--green-600);}
+    .vuelto-val.err{color:var(--red-400);}
+    .modal-btns{display:flex;gap:10px;}
+    .modal-btns button{flex:1;height:48px;border-radius:var(--radius-md);border:none;cursor:pointer;font-size:15px;font-weight:600;}
+    .modal-btns button:active{transform:scale(0.97);}
+    .btn-cancelar{background:var(--bg2);color:var(--text);}
+    .btn-confirmar{background:var(--blue-400);color:#fff;}
+    .btn-confirmar:disabled{background:var(--bg2);color:var(--text3);cursor:default;}
+
+    /* Numpad compartido */
+    .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem;}
+    .nk{height:54px;border:.5px solid var(--border2);border-radius:var(--radius-md);background:var(--bg2);cursor:pointer;font-size:20px;font-weight:600;color:var(--text);display:flex;align-items:center;justify-content:center;transition:.1s;}
+    .nk:active{transform:scale(0.94);background:var(--bg3);}
+    .nk.nk-del{font-size:16px;color:var(--text2);}
+
+    /* PIN */
+    .pin-dots{display:flex;justify-content:center;gap:14px;margin-bottom:1.25rem;margin-top:.5rem;}
+    .pin-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);background:var(--bg2);transition:.15s;}
+    .pin-dot.filled{background:var(--blue-400);border-color:var(--blue-400);}
+    .pin-dot.error{background:var(--red-400);border-color:var(--red-400);}
+    .pin-subtitle{font-size:13px;color:var(--text2);text-align:center;margin-bottom:1rem;}
+    .pin-error{font-size:13px;color:var(--red-600);text-align:center;margin-bottom:.75rem;min-height:20px;font-weight:500;}
+
+    /* Loading */
+    .loading{text-align:center;padding:2rem;color:var(--text2);font-size:14px;}
+  </style>
+</head>
+<body>
+<div class="app" id="app"><div class="loading"><i class="ti ti-loader-2"></i> Cargando datos...</div></div>
+<div id="modal-root"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const ADMIN_PIN = '123456';
+const TODAY = new Date().toLocaleDateString('es-SV',{year:'numeric',month:'2-digit',day:'2-digit'}).split('/').reverse().join('-');
+const DISPLAY_TODAY = new Date().toLocaleDateString('es-SV',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+const S = {
+  view:'desayuno', manage:false,
+  showCobro:false, showPin:false,
+  isAdmin:false, pinAction:null, pinStr:'', pinError:'',
+  desayuno:{ open:false, openTime:null, closeTime:null, sales:[] },
+  almuerzo:{ open:false, openTime:null, closeTime:null, sales:[] },
+  menu:[
+    {id:1,name:'Huevos revueltos',price:3.50,cat:'platos'},
+    {id:2,name:'Casado de pollo',price:5.00,cat:'platos'},
+    {id:3,name:'Arroz con frijoles',price:4.00,cat:'platos'},
+    {id:4,name:'Frijoles con queso',price:3.00,cat:'porciones'},
+    {id:5,name:'Plátano frito',price:1.50,cat:'porciones'},
+    {id:6,name:'Jugo natural',price:1.50,cat:'bebidas'},
+    {id:7,name:'Café con leche',price:1.25,cat:'bebidas'},
+    {id:8,name:'Agua pura',price:0.75,cat:'bebidas'},
+  ],
+  nextId:9, cart:{}, newName:'', newPrice:'', newCat:'platos', pagoStr:'',
+  history:{}, expandedDay:null, saving:false
+};
+
+// ── Toast ──
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+
+// ── Persistencia ──
+async function loadData(){
+  try {
+    const res = await fetch('/api/state');
+    const data = await res.json();
+    S.history = data.days || {};
+    if (data.menu) { S.menu = data.menu; S.nextId = Math.max(...data.menu.map(m=>m.id))+1; }
+    if (data.days[TODAY]) {
+      const d = data.days[TODAY];
+      S.desayuno = d.desayuno || S.desayuno;
+      S.almuerzo = d.almuerzo || S.almuerzo;
+    }
+  } catch(e) { console.warn('Sin conexión al servidor, modo offline.'); }
+  render();
+}
+
+async function saveData(){
+  if (S.saving) return;
+  S.saving = true;
+  try {
+    await fetch('/api/state', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        date: TODAY,
+        desayuno: S.desayuno,
+        almuerzo: S.almuerzo,
+        menu: S.menu
+      })
+    });
+  } catch(e) { console.warn('No se pudo guardar.'); }
+  S.saving = false;
+}
+
+const fmt = n => '$'+Number(n).toFixed(2);
+const now = () => new Date().toLocaleTimeString('es-SV',{hour:'2-digit',minute:'2-digit'});
+const totalT = t => S[t].sales.reduce((a,s)=>a+s.total,0);
+const cartTotal = () => Object.entries(S.cart).reduce((a,[id,qty])=>{ const m=S.menu.find(x=>x.id===parseInt(id)); return a+(m?m.price*qty:0); },0);
+const cartCount = () => Object.values(S.cart).reduce((a,q)=>a+q,0);
+
+// ── PIN ──
+function requirePin(action, label){
+  S.showPin=true; S.pinAction={fn:action,label:label||'Acción'}; S.pinStr=''; S.pinError=''; renderModal();
+}
+function pinKey(k){
+  if(S.pinStr.length>=6) return;
+  S.pinStr+=k; S.pinError='';
+  if(S.pinStr.length===6) setTimeout(checkPin,130);
+  renderModal();
+}
+function pinDel(){ S.pinStr=S.pinStr.slice(0,-1); S.pinError=''; renderModal(); }
+function checkPin(){
+  if(S.pinStr===ADMIN_PIN){ S.showPin=false; S.isAdmin=true; const fn=S.pinAction.fn; S.pinAction=null; S.pinStr=''; renderModal(); fn(); }
+  else { S.pinError='PIN incorrecto. Intenta de nuevo.'; S.pinStr=''; renderModal(); }
+}
+function cerrarPin(){ S.showPin=false; S.pinStr=''; S.pinError=''; S.pinAction=null; renderModal(); }
+function logoutAdmin(){ S.isAdmin=false; render(); }
+
+// ── Acciones protegidas ──
+function openTurno(t){ S[t].open=true; S[t].openTime=now(); S[t].closeTime=null; S.cart={}; saveData(); render(); showToast('Turno abierto ✓'); }
+function closeTurno(t){ S[t].open=false; S[t].closeTime=now(); saveData(); render(); showToast('Turno cerrado'); }
+function tryOpenTurno(t){ if(S.isAdmin) openTurno(t); else requirePin(()=>openTurno(t),'Abrir turno'); }
+function tryCloseTurno(t){ if(S.isAdmin) closeTurno(t); else requirePin(()=>closeTurno(t),'Cerrar turno'); }
+function tryManage(){ if(S.isAdmin){ S.manage=!S.manage; render(); } else requirePin(()=>{ S.manage=true; render(); },'Administrar platillos'); }
+function removeSale(t,id){ S[t].sales=S[t].sales.filter(s=>s.id!==id); saveData(); render(); showToast('Venta eliminada'); }
+function tryDeleteSale(t,id){ if(S.isAdmin) removeSale(t,id); else requirePin(()=>removeSale(t,id),'Eliminar venta'); }
+function addMenuItem(){ if(!S.newName.trim()||!S.newPrice) return; S.menu.push({id:S.nextId++,name:S.newName.trim(),price:parseFloat(S.newPrice),cat:S.newCat}); S.newName=''; S.newPrice=''; S.newCat='platos'; saveData(); render(); showToast('Platillo agregado ✓'); }
+function removeMenuItem(id){ S.menu=S.menu.filter(m=>m.id!==id); saveData(); render(); showToast('Platillo eliminado'); }
+function tryAddItem(){ if(S.isAdmin) addMenuItem(); else requirePin(()=>addMenuItem(),'Agregar platillo'); }
+function tryDeleteItem(id){ if(S.isAdmin) removeMenuItem(id); else requirePin(()=>removeMenuItem(id),'Eliminar platillo'); }
+
+function tapFood(id){ if(!S[S.view].open) return; S.cart[id]=(S.cart[id]||0)+1; render(); }
+function clearCart(){ S.cart={}; render(); }
+function toggleDay(d){ S.expandedDay = S.expandedDay===d ? null : d; render(); }
+
+// ── Cobro ──
+function abrirCobro(){ S.showCobro=true; S.pagoStr=''; renderModal(); }
+function cerrarCobro(){ S.showCobro=false; renderModal(); }
+function numpad(k){
+  if(k==='del'){ S.pagoStr=S.pagoStr.slice(0,-1); }
+  else if(k==='.'){ if(!S.pagoStr.includes('.')) S.pagoStr+='.'; }
+  else if(k==='00'){ if(S.pagoStr!=='') S.pagoStr+='00'; }
+  else { const p=S.pagoStr.split('.'); if(p[1]!==undefined&&p[1].length>=2) return; S.pagoStr+=k; }
+  renderModal();
+}
+function confirmarCobro(){
+  const t=S.view, pago=parseFloat(S.pagoStr)||0;
+  if(pago<cartTotal()) return;
+  Object.entries(S.cart).forEach(([id,qty])=>{
+    const item=S.menu.find(m=>m.id===parseInt(id));
+    if(!item) return;
+    S[t].sales.push({id:Date.now()+Math.random(),name:item.name,price:item.price,qty,total:item.price*qty,time:now()});
+  });
+  S.cart={}; S.showCobro=false; S.pagoStr='';
+  saveData(); renderModal(); render();
+  showToast('¡Venta registrada! ✓');
+}
+
+// ── Renderizar modal ──
+function renderModal(){
+  const root=document.getElementById('modal-root');
+  if(S.showPin){
+    const label=S.pinAction?S.pinAction.label:'Acceso admin';
+    const dots=Array.from({length:6},(_,i)=>`<div class="pin-dot${i<S.pinStr.length?(S.pinError?' error':' filled'):''}"></div>`).join('');
+    root.innerHTML=`
+      <div class="modal-overlay">
+        <div class="modal">
+          <div class="modal-title"><i class="ti ti-lock"></i> PIN de administrador</div>
+          <div class="pin-subtitle">${label}</div>
+          <div class="pin-dots">${dots}</div>
+          <div class="pin-error">${S.pinError}</div>
+          <div class="numpad">
+            ${['7','8','9','4','5','6','1','2','3'].map(n=>`<button class="nk" onclick="pinKey('${n}')">${n}</button>`).join('')}
+            <button class="nk" style="visibility:hidden"></button>
+            <button class="nk" onclick="pinKey('0')">0</button>
+            <button class="nk nk-del" onclick="pinDel()"><i class="ti ti-backspace"></i></button>
+          </div>
+          <div class="modal-btns"><button class="btn-cancelar" onclick="cerrarPin()">Cancelar</button></div>
+        </div>
+      </div>`;
+    return;
+  }
+  if(!S.showCobro){ root.innerHTML=''; return; }
+  const total=cartTotal(), pago=parseFloat(S.pagoStr)||0, vuelto=pago-total, alcanza=pago>=total&&S.pagoStr!=='';
+  const cartLines=Object.entries(S.cart).filter(([,q])=>q>0).map(([id,qty])=>{
+    const m=S.menu.find(x=>x.id===parseInt(id));
+    return m?`<div class="cobro-linea"><span class="lbl">${m.name} x${qty}</span><span class="val">${fmt(m.price*qty)}</span></div>`:'';
+  }).join('');
+  root.innerHTML=`
+    <div class="modal-overlay" onclick="if(event.target===this)cerrarCobro()">
+      <div class="modal">
+        <div class="modal-title"><i class="ti ti-cash"></i> Cobrar</div>
+        ${cartLines}
+        <div class="divider"></div>
+        <div class="cobro-total"><span class="lbl">Total a cobrar</span><span class="val">${fmt(total)}</span></div>
+        <div class="cobro-input-label">Efectivo del cliente</div>
+        <div class="cobro-input">${S.pagoStr||'0.00'}</div>
+        <div class="numpad">
+          ${['7','8','9','4','5','6','1','2','3'].map(n=>`<button class="nk" onclick="numpad('${n}')">${n}</button>`).join('')}
+          <button class="nk" onclick="numpad('00')">00</button>
+          <button class="nk" onclick="numpad('0')">0</button>
+          <button class="nk nk-del" onclick="numpad('del')"><i class="ti ti-backspace"></i></button>
+        </div>
+        ${S.pagoStr!==''?`
+          <div class="vuelto-box ${alcanza?'ok':'err'}">
+            <div class="vuelto-lbl ${alcanza?'ok':'err'}">${alcanza?'Vuelto a dar':'Monto insuficiente'}</div>
+            <div class="vuelto-val ${alcanza?'ok':'err'}">${alcanza?fmt(vuelto):'— $'+Math.abs(vuelto).toFixed(2)+' —'}</div>
+          </div>`:'<div style="height:74px"></div>'}
+        <div class="modal-btns">
+          <button class="btn-cancelar" onclick="cerrarCobro()">Cancelar</button>
+          <button class="btn-confirmar" onclick="confirmarCobro()" ${!alcanza?'disabled':''}><i class="ti ti-check"></i> Confirmar cobro</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Render principal ──
+function render(){
+  const t=S.view, turno=S[t], isOpen=turno.open;
+  const cTotal=cartTotal(), cCount=cartCount();
+
+  const CATS = [
+    {key:'platos',   label:'Platos por defecto', icon:'ti-plate'},
+    {key:'porciones',label:'Porciones',           icon:'ti-components'},
+    {key:'bebidas',  label:'Bebidas',             icon:'ti-cup'},
+  ];
+
+  function foodBtns(cat){
+    return S.menu.filter(m=>m.cat===cat).map(m=>{
+      const qty=S.cart[m.id]||0;
+      return `<button class="food-btn${qty>0?' has-qty':''}" onclick="tapFood(${m.id})">
+        ${qty>0?`<span class="qty-badge">${qty}</span>`:''}
+        <span class="f-name">${m.name}</span>
+        <span class="f-price">${fmt(m.price)}</span>
+      </button>`;
+    }).join('');
+  }
+
+  const catLayout = CATS.map(c=>{
+    const btns = foodBtns(c.key);
+    if(!btns) return '';
+    return `<div class="cat-block">
+      <div class="cat-label"><i class="ti ${c.icon}"></i> ${c.label}</div>
+      <div class="food-grid">${btns}</div>
+    </div>`;
+  }).join('');
+
+  const cartLines=Object.entries(S.cart).filter(([,q])=>q>0).map(([id,qty])=>{ const m=S.menu.find(x=>x.id===parseInt(id)); return m?`${m.name} x${qty}`:''; }).filter(Boolean).join(' · ');
+
+  const salesHTML=turno.sales.length===0
+    ?`<p class="empty-msg"><i class="ti ti-receipt"></i> Sin ventas registradas.</p>`
+    :`<div class="sales-list">`+turno.sales.map(s=>`
+      <div class="sale-row">
+        <div><div style="font-weight:600">${s.name}</div><div style="font-size:12px;color:var(--text2)">x${s.qty} · ${s.time}</div></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-weight:700;color:var(--green-600)">${fmt(s.total)}</span>
+          ${S.isAdmin
+            ?`<button class="del-btn" onclick="removeSale('${t}',${s.id})"><i class="ti ti-x"></i></button>`
+            :`<span class="lock-icon"><i class="ti ti-lock"></i></span>`}
+        </div>
+      </div>`).join('')+`</div>`;
+
+  const manageHTML=S.manage?`
+    <div class="section">
+      <div class="sec-header">
+        <span class="sec-title"><i class="ti ti-tools"></i> Administrar platillos</span>
+        <button class="btn" onclick="S.manage=false;render()">Cerrar</button>
+      </div>
+      ${S.menu.map(m=>`
+        <div class="manage-row">
+          <span style="flex:1;font-weight:500">${m.name}</span>
+          <span style="color:var(--text2);margin:0 12px">${fmt(m.price)}</span>
+          <button class="del-btn" onclick="tryDeleteItem(${m.id})"><i class="ti ti-trash"></i></button>
+        </div>`).join('')}
+      <div class="add-row">
+        <input type="text" placeholder="Nombre del platillo" value="${S.newName}" oninput="S.newName=this.value"/>
+        <input type="number" placeholder="Precio $" step="0.25" min="0" value="${S.newPrice}" oninput="S.newPrice=this.value" style="width:105px"/>
+        <select onchange="S.newCat=this.value" style="padding:8px 10px;border:.5px solid var(--border2);border-radius:var(--radius-md);background:var(--bg);color:var(--text);font-size:13px;">
+          <option value="platos" ${S.newCat==='platos'?'selected':''}>Platos</option>
+          <option value="porciones" ${S.newCat==='porciones'?'selected':''}>Porciones</option>
+          <option value="bebidas" ${S.newCat==='bebidas'?'selected':''}>Bebidas</option>
+        </select>
+        <button class="btn btn-primary" onclick="tryAddItem()"><i class="ti ti-plus"></i> Agregar</button>
+      </div>
+    </div>`:'';
+
+  // ── Historial ──
+  const historyDays = Object.entries(S.history)
+    .filter(([d])=>d!==TODAY)
+    .sort(([a],[b])=>b.localeCompare(a));
+
+  const historyView=`
+    <div class="section">
+      <div class="sec-header"><span class="sec-title"><i class="ti ti-calendar-stats"></i> Historial de días</span></div>
+      ${historyDays.length===0?`<p class="empty-msg"><i class="ti ti-history"></i> Aún no hay días anteriores registrados.</p>`:
+        historyDays.map(([date,day])=>{
+          const dTotal=(day.desayuno?.sales||[]).reduce((a,s)=>a+s.total,0)+(day.almuerzo?.sales||[]).reduce((a,s)=>a+s.total,0);
+          const dDes=(day.desayuno?.sales||[]).reduce((a,s)=>a+s.total,0);
+          const dAlm=(day.almuerzo?.sales||[]).reduce((a,s)=>a+s.total,0);
+          const label=new Date(date+'T12:00:00').toLocaleDateString('es-SV',{weekday:'long',day:'numeric',month:'long'});
+          const isOpen=S.expandedDay===date;
+          return `
+            <div class="history-day">
+              <div class="history-day-header" onclick="toggleDay('${date}')">
+                <span class="history-day-title"><i class="ti ti-calendar"></i> ${label}</span>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <span class="history-day-total">${fmt(dTotal)}</span>
+                  <i class="ti ti-chevron-${isOpen?'up':'down'}" style="color:var(--text2)"></i>
+                </div>
+              </div>
+              ${isOpen?`
+              <div class="history-day-body open">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                  <div>
+                    <div class="history-turno-title"><i class="ti ti-sun"></i> Desayuno — ${fmt(dDes)}</div>
+                    ${(day.desayuno?.sales||[]).length===0?'<p class="empty-msg" style="font-size:12px">Sin ventas</p>':
+                      (day.desayuno.sales).map(s=>`<div class="history-sale-row"><span>${s.name} x${s.qty}</span><span style="color:var(--green-600);font-weight:600">${fmt(s.total)}</span></div>`).join('')}
+                  </div>
+                  <div>
+                    <div class="history-turno-title"><i class="ti ti-bowl"></i> Almuerzo — ${fmt(dAlm)}</div>
+                    ${(day.almuerzo?.sales||[]).length===0?'<p class="empty-msg" style="font-size:12px">Sin ventas</p>':
+                      (day.almuerzo.sales).map(s=>`<div class="history-sale-row"><span>${s.name} x${s.qty}</span><span style="color:var(--green-600);font-weight:600">${fmt(s.total)}</span></div>`).join('')}
+                  </div>
+                </div>
+                <div class="divider"></div>
+                <div style="font-size:12px;color:var(--text2)">
+                  Desayuno: ${day.desayuno?.openTime||'—'} – ${day.desayuno?.closeTime||'—'} &nbsp;|&nbsp;
+                  Almuerzo: ${day.almuerzo?.openTime||'—'} – ${day.almuerzo?.closeTime||'—'}
+                </div>
+              </div>`:''}
+            </div>`;
+        }).join('')}
+    </div>`;
+
+  // ── Resumen del día ──
+  const resumenView=`
+    <div class="section">
+      <div class="sec-header"><span class="sec-title"><i class="ti ti-chart-bar"></i> Resumen de hoy</span></div>
+      <div class="summary-grid">
+        <div class="metric"><div class="metric-label"><i class="ti ti-sun"></i> Desayuno</div><div class="metric-val blue">${fmt(totalT('desayuno'))}</div></div>
+        <div class="metric"><div class="metric-label"><i class="ti ti-bowl"></i> Almuerzo</div><div class="metric-val blue">${fmt(totalT('almuerzo'))}</div></div>
+        <div class="metric" style="background:var(--green-50);border-color:var(--green-400)"><div class="metric-label">Total del día</div><div class="metric-val green">${fmt(totalT('desayuno')+totalT('almuerzo'))}</div></div>
+      </div>
+      <div class="divider"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <p style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px"><i class="ti ti-sun"></i> Desayuno</p>
+          ${S.desayuno.sales.length===0?'<p class="empty-msg">Sin ventas</p>':S.desayuno.sales.map(s=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:.5px solid var(--border)"><span>${s.name} x${s.qty}</span><span style="color:var(--green-600);font-weight:600">${fmt(s.total)}</span></div>`).join('')}
+        </div>
+        <div>
+          <p style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px"><i class="ti ti-bowl"></i> Almuerzo</p>
+          ${S.almuerzo.sales.length===0?'<p class="empty-msg">Sin ventas</p>':S.almuerzo.sales.map(s=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:.5px solid var(--border)"><span>${s.name} x${s.qty}</span><span style="color:var(--green-600);font-weight:600">${fmt(s.total)}</span></div>`).join('')}
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div style="font-size:12px;color:var(--text2);text-align:center">
+        <i class="ti ti-info-circle"></i>
+        Desayuno: ${S.desayuno.openTime||'—'} – ${S.desayuno.closeTime||'aún abierto'}
+        &nbsp;|&nbsp;
+        Almuerzo: ${S.almuerzo.openTime||'—'} – ${S.almuerzo.closeTime||'aún abierto'}
+      </div>
+    </div>`;
+
+  const turnoView=`
+    <div class="section">
+      <div class="sec-header">
+        <span class="sec-title">
+          <i class="ti ti-${t==='desayuno'?'sun':'bowl'}"></i>
+          Turno ${t==='desayuno'?'Desayuno':'Almuerzo'}
+          <span class="${isOpen?'badge-open':'badge-closed'}">${isOpen?'Abierto':'Cerrado'}</span>
+        </span>
+        ${isOpen
+          ?`<button class="btn btn-close" onclick="tryCloseTurno('${t}')"><i class="ti ti-lock"></i> Cerrar turno</button>`
+          :`<button class="btn btn-open" onclick="tryOpenTurno('${t}')"><i class="ti ti-lock-open"></i> Abrir turno</button>`}
+      </div>
+      <div class="status-row">
+        ${turno.openTime?`<span class="status-item">Apertura: <span>${turno.openTime}</span></span>`:''}
+        ${turno.closeTime?`<span class="status-item">Cierre: <span>${turno.closeTime}</span></span>`:''}
+        <span class="status-item">Ventas: <span>${turno.sales.length}</span></span>
+        <span class="status-item">Total: <span>${fmt(totalT(t))}</span></span>
+      </div>
+    </div>
+
+    ${isOpen?`
+    <div class="section">
+      <div class="sec-header">
+        <span class="sec-title"><i class="ti ti-grid-dots"></i> Toca para agregar porciones</span>
+        <button class="btn" onclick="tryManage()" style="font-size:12px"><i class="ti ti-settings"></i> Platillos</button>
+      </div>
+      <div class="cat-layout">${catLayout}</div>
+      <div class="cart-bar">
+        ${cCount>0
+          ?`<div class="cart-summary">
+               <div style="font-size:12px;color:var(--blue-600);margin-bottom:2px">${cartLines}</div>
+               ${S.isAdmin?`<div class="cart-total">${fmt(cTotal)}</div>`:`<div style="font-size:12px;color:var(--text3);font-style:italic">${cCount} porción(es) seleccionada(s)</div>`}
+             </div>
+             <button class="btn-clear" onclick="clearCart()"><i class="ti ti-x"></i> Limpiar</button>
+             <button class="btn-sell" onclick="abrirCobro()"><i class="ti ti-cash"></i> Cobrar</button>`
+          :`<div style="flex:1;font-size:13px;color:var(--text2)">Toca los platillos para ir sumando porciones</div>`}
+      </div>
+    </div>`:''}
+
+    ${manageHTML}
+
+    <div class="section">
+      <div class="sec-header"><span class="sec-title"><i class="ti ti-receipt"></i> Ventas del turno</span></div>
+      ${salesHTML}
+      ${turno.sales.length>0?`<div class="divider"></div><div style="text-align:right;font-size:15px;font-weight:700;color:var(--green-600)">Total: ${fmt(totalT(t))}</div>`:''}
+    </div>`;
+
+  let mainContent;
+  if(t==='resumen') mainContent=resumenView;
+  else if(t==='historial') mainContent=historyView;
+  else mainContent=turnoView;
+
+  document.getElementById('app').innerHTML=`
+    <div class="header">
+      <h1><i class="ti ti-building-store"></i> POS Comedor</h1>
+      <div class="header-right">
+        <span class="date-badge">${DISPLAY_TODAY}</span>
+        ${S.isAdmin
+          ?`<span class="admin-badge on" onclick="logoutAdmin()"><i class="ti ti-shield-check"></i> Admin <i class="ti ti-logout" style="font-size:11px"></i></span>`
+          :`<span class="admin-badge off" onclick="requirePin(()=>{ S.isAdmin=true; render(); },'Acceso administrador')"><i class="ti ti-shield"></i> Admin</span>`}
+      </div>
+    </div>
+    <div class="tabs">
+      <div class="tab ${t==='desayuno'?'t-des':''}" onclick="S.view='desayuno';render()"><i class="ti ti-sun"></i> Desayuno</div>
+      <div class="tab ${t==='almuerzo'?'t-alm':''}" onclick="S.view='almuerzo';render()"><i class="ti ti-bowl"></i> Almuerzo</div>
+      <div class="tab ${t==='historial'?'t-his':''}" onclick="S.view='historial';render()"><i class="ti ti-history"></i> Historial</div>
+      <div class="tab ${t==='resumen'?'t-res':''}" onclick="S.view='resumen';render()"><i class="ti ti-chart-bar"></i> Hoy</div>
+    </div>
+    ${mainContent}`;
+}
+
+loadData();
+</script>
+</body>
+</html>
