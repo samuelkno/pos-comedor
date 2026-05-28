@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Comedor Vanessa</title>
+  <title>POS Comedor</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
     :root{
       --bg:#FFFFFF;
       --bg2:#F0F6FF;
-      --bg3:#0F172A;
+      --bg3:#E2EFFD;
       --text:#0F2744;
       --text2:#4A6FA5;
       --text3:#8AABCE;
@@ -229,15 +229,24 @@ function showToast(msg){ const t=document.getElementById('toast'); t.textContent
 // ── Persistencia ──
 async function loadData(){
   try {
-    const res = await fetch('/api/state');
+    const res = await fetch('/api/state?date=' + TODAY);
     const data = await res.json();
-    S.history = data.days || {};
-    if (data.menu) { S.menu = data.menu; S.nextId = Math.max(...data.menu.map(m=>m.id))+1; }
-    if (data.days[TODAY]) {
-      const d = data.days[TODAY];
-      S.desayuno = d.desayuno || S.desayuno;
-      S.almuerzo = d.almuerzo || S.almuerzo;
+
+    // Cargar menú desde DB
+    if (data.menu && data.menu.length > 0) {
+      S.menu = data.menu;
+      S.nextId = Math.max(...data.menu.map(m => m.id)) + 1;
     }
+
+    // Cargar día de hoy si existe
+    if (data.today) {
+      S.desayuno = data.today.desayuno || S.desayuno;
+      S.almuerzo = data.today.almuerzo || S.almuerzo;
+    }
+
+    // Cargar historial
+    S.history = data.history || {};
+
   } catch(e) { console.warn('Sin conexión al servidor, modo offline.'); }
   render();
 }
@@ -246,17 +255,19 @@ async function saveData(){
   if (S.saving) return;
   S.saving = true;
   try {
+    // Guardar ventas del día
     await fetch('/api/state', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        date: TODAY,
-        desayuno: S.desayuno,
-        almuerzo: S.almuerzo,
-        menu: S.menu
-      })
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ date: TODAY, desayuno: S.desayuno, almuerzo: S.almuerzo })
     });
-  } catch(e) { console.warn('No se pudo guardar.'); }
+    // Guardar menú por separado
+    await fetch('/api/menu', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ menu: S.menu })
+    });
+  } catch(e) { console.warn('No se pudo guardar:', e); }
   S.saving = false;
 }
 
@@ -583,7 +594,7 @@ function render(){
 
   document.getElementById('app').innerHTML=`
     <div class="header">
-      <h1><i class="ti ti-building-store"></i> Comedor Vanessa</h1>
+      <h1><i class="ti ti-building-store"></i> POS Comedor</h1>
       <div class="header-right">
         <span class="date-badge">${DISPLAY_TODAY}</span>
         ${S.isAdmin
